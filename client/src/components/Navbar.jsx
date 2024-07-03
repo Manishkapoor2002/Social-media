@@ -134,7 +134,12 @@ export const Navbar = () => {
         setOpenSearch(false);
         setShowSearchTerm("")
     }
-    const handleClose = () => setOpen(false)
+    const handleClose = () => {
+        setOpen(false);
+        setpostBody("");
+        setImage(null);
+        setShowImg("https://i0.wp.com/read.crowdfireapp.com/wp-content/uploads/2023/02/Blog_Banner_5_Great_Tools_to_Simultaneously_Post_Content_to_Multiple_Social_Media_Sites.png?resize=810%2C580&ssl=1");
+    }
 
     const debounceRequest = debounce(async (searchedname) => {
         try {
@@ -154,7 +159,7 @@ export const Navbar = () => {
             console.error('Error occurred while searching for user:', err);
         }
 
-    }, 2000);
+    }, 3500);
 
     const handlePostUpload = async () => {
 
