@@ -1,7 +1,6 @@
 import mongoose from 'mongoose';
 const { Schema } = mongoose;
 const userSchema = new Schema({
-    'userId': String,
     "username": String,
     'email': String,
     "profilePicture": String,
@@ -16,8 +15,8 @@ const userSchema = new Schema({
 })
 
 const userPassword = new Schema({
-    'username':String,
-    'password':String
+    'username': String,
+    'password': String
 })
 
 
@@ -35,12 +34,12 @@ const commentSchema = new Schema({
     'commentBody': String,
     'postId': String,
     'postDate': String,
-    'commentAuth': {type: mongoose.Schema.Types.ObjectId, ref: 'User' }
+    'commentAuth': { type: mongoose.Schema.Types.ObjectId, ref: 'User' }
 })
 
 const User = mongoose.model('User', userSchema);
 const Post = mongoose.model('Post', postSchema);
 const Comment = mongoose.model('Comment', commentSchema)
-const UserPassword = mongoose.model('UserPassword',userPassword) 
+const UserPassword = mongoose.model('UserPassword', userPassword)
 
-export { User, Post, Comment , UserPassword};
+export { User, Post, Comment, UserPassword };

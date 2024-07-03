@@ -6,32 +6,22 @@ const profileRoute = express.Router();
 
 // search user Profile
 profileRoute.get('/search/:username', authenticationJWT, async (req, res) => {
-    const currentUserName = req.user.username;
     try {
-        const user = await User.findOne({ 'username': req.params.username });
+        const currUsername = req.user.username;
+        const curr = await User.findOne({ 'username': currUsername })
+        const user = await User.findOne({ 'username': req.params.username }).populate('followers').populate('followings');
+
         if (!user) {
-            res.json({ "message": "User not found" })
+            return res.json({ "message": "User not found" })
         } else {
-            let result = user.followers.includes(currentUserName);
-            let postLen = user.totalPost.length || 0;
-
-
             res.json({
-                'userDetail': {
-                    "username": user.username,
-                    "email": user.email,
-                    "profilePicture": user.profilePicture,
-                    postLen,
-                    "followings": user.followings,
-                    "followers": user.followers,
-                    'isFollowing': result,
-                    'userDescription': user.userDescription
-                },
+                'userDetail': user,
                 "message": "User Data Send Successfully",
             });
         }
 
     } catch (err) {
+        console.log(err);
         res.json({ 'message': 'something went wrong', "error": err })
     }
 
@@ -39,7 +29,7 @@ profileRoute.get('/search/:username', authenticationJWT, async (req, res) => {
 
 // update profile route (update user details : profile pic and Description)
 profileRoute.post('/updateProfile', authenticationJWT, async (req, res) => {
-    const { newProfilePic, newUserDescription } = req.body;  
+    const { newProfilePic, newUserDescription } = req.body;
 
     try {
         const user = await User.findOne({ 'username': req.user.username });
@@ -58,8 +48,8 @@ profileRoute.post('/updateProfile', authenticationJWT, async (req, res) => {
 
 })
 
-// own prfoile detail
-profileRoute.get('/myprofile',authenticationJWT,async(req,res)=>{
+// own profile detail
+profileRoute.get('/myprofile', authenticationJWT, async (req, res) => {
     try {
         const user = await User.findOne({ 'username': req.user.username });
         if (user) {
@@ -71,7 +61,7 @@ profileRoute.get('/myprofile',authenticationJWT,async(req,res)=>{
                     'totalPost': user.totalPost,
                     "followings": user.followings,
                     "followers": user.followers,
-                    "userDescription":user.userDescription
+                    "userDescription": user.userDescription
                 },
                 'message': 'User Data Send Successfully'
             });

@@ -13,7 +13,7 @@ commentRouter.post('/upload/:postId', authenticationJWT, async (req, res) => {
             return res.json({ 'message': 'something went wrong, Login again', 'error': 'user verifed but not found!' });
         }
         const id = req.params.postId
-        if (id.length != 24) {
+        if (id.length !== 24) {
             return res.json({ 'message': 'post id is not correct' })
         }
         const post = await Post.findById(id);
@@ -41,7 +41,7 @@ commentRouter.post('/upload/:postId', authenticationJWT, async (req, res) => {
 commentRouter.get('/getAllComment/:postId', authenticationJWT, async (req, res) => {
     try {
         const allComment = await Comment.find({ 'postId': req.params.postId }).populate('commentAuth');
-        if (!allComment || allComment.length == 0) {
+        if (!allComment || allComment.length === 0) {
             return res.json({ 'message': 'No comments' })
         }
         res.json({ 'allComments': allComment, 'message': 'Comments Send Successfully' })

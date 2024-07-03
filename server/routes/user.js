@@ -9,7 +9,22 @@ dotenv.config();
 const Secretkey = process.env.SECRET_KEY
 const Salt_Value = (parseInt)(process.env.SALT_VALUE)
 const userRouter = express.Router()
- 
+
+
+// about me:
+userRouter.get('/me', authenticationJWT, async (req, res) => {
+    res.json({ 'message': 'Logged in', 'username': req.user.username });
+})
+
+// get profile pic of user:
+userRouter.get('/getProfilePic/:username', async (req, res) => {
+    const user = await User.findOne({ 'username': req.params.username })
+    if (user) {
+        res.json({ 'message': 'user found', 'profilePicture': user.profilePicture });
+    } else {
+        res.json({ 'message': 'user Not found' })
+    }
+})
 
 // signup route(new user signup)
 userRouter.post('/signup', async (req, res) => {
@@ -38,15 +53,7 @@ userRouter.post('/signup', async (req, res) => {
         await newUser.save();
         await newUserPassword.save();
 
-        const userDetail = {
-            'username': newUser.username,
-            'email': newUser.email,
-            'profilePicture': newUser.profilePicture,
-            "totalPost": newUser.totalPost,
-            'userDescription': newUser.userDescription
-        }
-
-        res.json({ 'message': 'User has been created', "token": token, "userID": newUser._id, userDetail });
+        res.json({ 'message': 'User has been created', "token": token, "userID": newUser._id });
 
     } catch (err) {
         res.json({ 'message': 'something went wrong', "error": err })
@@ -65,39 +72,60 @@ userRouter.post('/login', async (req, res) => {
         const user = await User.findOne({ username })
         const pass = await UserPassword.findOne({ username });
 
-        if (!user) {
-            res.json({ "message": "user not found" });
-        } else {
-            const check = bcrypt.compare(password, pass.password);
-            if (check) {
-                const userEmail = user.email;
-                const token = jwt.sign({ 'username': username, 'email': userEmail }, Secretkey, { expiresIn: '7days' })
-
-                const userDetail = {
-                    'username': user.username,
-                    'email': user.email,
-                    'profilePicture': user.profilePicture,
-                    "totalPost": user.totalPost,
-                    'userDescription': user.userDescription
-                }
-
-                res.json({
-                    'message': 'User has been successfully logged in',
-                    'token': token,
-                    userDetail
-                })
-
-            } else {
-                res.json({ 'message': 'User authorization failed', "error": "username or password doesn't match" });
-            }
+        if (!user || !pass) {
+            return res.json({ "message": "user || pass not found" });
         }
+
+        const check = await bcrypt.compare(password, pass.password);
+
+        if (!check) {
+            return res.json({ 'message': 'User authorization failed', "error": "username or password doesn't match" });
+        }
+        if (check) {
+            const userEmail = user.email;
+            const token = jwt.sign({ 'username': username, 'email': userEmail }, Secretkey, { expiresIn: '7days' })
+
+            return res.json({
+                'message': 'User has been successfully logged in',
+                'token': token,
+                'userId':user._id
+            })
+        }
+
     } catch (err) {
-        res.json({ 'message': 'something went wrong', "error": 'err' });
+        res.json({ 'message': 'something went wrong', "error": err });
     }
 })
 
+userRouter.get('/isFollowing/:username', authenticationJWT, async (req, res) => {
+    try {
+        if (req.params.username === req.user.username) {
+            return res.json({ 'message': 'something went wrong', 'error': 'you cannot unfollow yourself' });
+        }
+        const [other, curr] = await Promise.all([
+            User.findOne({ 'username': req.params.username }),
+            User.findOne({ 'username': req.user.username })
+        ]);
+
+        if (!other || !curr) {
+            return res.json({ 'message': 'user not found' });
+        }
+        const isFollowing = other.followers.includes(curr._id);
+
+        if (isFollowing) {
+            return res.json({ 'message': 'Already Following' })
+        } else {
+            return res.json({ 'message': 'Not Following' })
+        }
+    } catch (err) {
+        res.json({ 'message': 'something went wrong', 'error': err });
+    }
+
+})
+
+
 // follow route (follow other person)
-userRouter.post('/follow/:username', authenticationJWT, async (req, res) => {
+userRouter.get('/follow/:username', authenticationJWT, async (req, res) => {
     try {
 
         if (req.params.username === req.user.username) {
@@ -126,13 +154,13 @@ userRouter.post('/follow/:username', authenticationJWT, async (req, res) => {
         res.json({ "message": "followed successfully" })
     } catch (err) {
         console.log(err);
-        res.json({ 'messgae': 'something went wrong', 'error': err });
+        res.json({ 'message': 'something went wrong', 'error': err });
     }
 
 
 })
 // unFollow route (unfollow other person)
-userRouter.post('/unfollow/:username', authenticationJWT, async (req, res) => {
+userRouter.get('/unfollow/:username', authenticationJWT, async (req, res) => {
 
 
     try {
@@ -163,7 +191,7 @@ userRouter.post('/unfollow/:username', authenticationJWT, async (req, res) => {
         res.json({ "message": "unfollow successfully" })
     } catch (err) {
         console.log(err);
-        res.json({ 'messgae': 'something went wrong', 'error': err });
+        res.json({ 'message': 'something went wrong', 'error': err });
     }
 })
 

@@ -1,6 +1,5 @@
 import express from 'express';
 import { User } from '../db/index.js';
-import { authenticationJWT } from '../middlewares/auth.js';
 
 const isAvailableRouter = express.Router();
 
@@ -42,7 +41,5 @@ isAvailableRouter.get('/email/:email', async (req, res) => {
         res.json({ 'message': 'something went wrong', "error": err });
     }
 })
-
-
 
 export default isAvailableRouter;
