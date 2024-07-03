@@ -3,6 +3,11 @@
 
 Welcome to our Full Stack MERN Web Application! This project is built using the MERN stack along with Firebase for seamless Authentication and Authorization. Dive into a robust and dynamic application featuring real-time chat, post creation, comments, likes, and user interactions.
 
+## Demo Video:
+Watch the demo video below:
+
+[Demo Video](https://www.linkedin.com/feed/update/urn:li:ugcPost:7214324641895469057/)
+
 ## Features
 
 - **Tech Stack**: MERN (MongoDB, Express.js, React, Node.js) + Firebase
